@@ -14,11 +14,12 @@ body {
 }
 
 .root {
-    /* border: 1px solid orangered; */
     height: 370px;
+    top: 10px;
 }
 
 .root .spaces,
+.root .board,
 .root .columns {
     position: relative;
     width: 430px;
@@ -30,17 +31,25 @@ body {
 .spaces {
     display: grid;
     grid-template-columns: repeat(7, auto);
-    /* border: 1px solid brown; */
     border-radius: 10px 10px 0 0;
-    background-color: black;
 
     top: 10px;
     z-index: 10;
 }
 
-.columns {
-    /* border: 1px solid blue; */
+.board svg {
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 10px 0 goldenrod;
+}
+
+.board {
+    left: -10px;
     top: -370px;
+    z-index: 20;
+}
+
+.columns {
+    top: -740px;
 
     display: flex;
     flex-wrap: nowrap;
@@ -50,7 +59,6 @@ body {
 }
 
 .columns div {
-    /* border: 1px solid green; */
     width: 50px;
     height: 370px;
     cursor: pointer;
@@ -60,7 +68,7 @@ body {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background-color: #eee;
+    background-color: rgba(0,0,0,0.2);
 }
 
 div .red {
@@ -68,5 +76,63 @@ div .red {
 }
 div .blue {
     background-color: blue;
+}
+div .line {
+    border: 3px solid gold;
+}
+
+.bicolor {
+    background: linear-gradient(to right,red 50%,blue 51%);
+    box-shadow: 0 0 30px 5px black;
+}
+
+.endToken {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.win {
+    font-size: 20px;
+    color: silver;
+}
+
+.endGame {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    top: 30px;
+    width: 200px;
+    height: 200px;
+    box-shadow: 0 0 50px 50px white;
+    border-radius: 50%;
+    padding: 25px;
+    background-color: #222;
+    border: 3px goldenrod dotted;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 40;
+}
+
+.theGame {
+    position: relative;
+    top: 50px;
+}
+
+.hidden {
+    display: none;
+}
+
+.shift {
+    left: 190px;
+    top: -100px;
+    margin: 0 auto;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: beige;
 }
 
