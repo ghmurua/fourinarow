@@ -2,11 +2,12 @@
 
 const main = document.querySelector('.main');
 
-let c = 0;
-let color = 0;
+let game = 0;
+let redBlue;
+let color;
 let letter;
 let auxCount;
-let dir;
+let spaceColor;
 let countCol = {
     "A": 0,
     "B": 0,
@@ -36,7 +37,7 @@ const newTemplate = `
 </div>
 
 <div class='theGame'>
-    <div class='shift'></div>
+    <div class='shift posD pos0'></div>
 
     <div class="root">
         <div class='spaces'>
@@ -147,19 +148,22 @@ const newTemplate = `
     </div>
 </div>`;
 
+const changeColor = () => {
+    redBlue = !redBlue;
+    (redBlue) ? color = 'red' : color = 'blue'
+    document.querySelector('.shift').classList.add(color);
+}
+
 const drawLine = (lineUp, txt) => {
-    // console.warn(lineUp);
     lineUp.map(line => document.querySelector(`.${line}`).classList.add('line'))
     document.querySelector('.columns').removeEventListener('mousedown', clickHandler);
     document.querySelector('.endGame').classList.remove('hidden');
-    document.querySelector('.win').innerHTML = `<p>${txt.toUpperCase()} WINS</p>`;
     document.querySelector('.endToken').classList.add(txt, 'line');
+    document.querySelector('.win').innerHTML = `<p>${txt.toUpperCase()} WINS</p>`;
+    console.warn(color,'wins',lineUp);
 }
 
 const control = () => {
-    document.querySelector('.shift').classList.toggle('red');
-    document.querySelector('.shift').classList.toggle('blue');
-
     // VERTICAL posibles (3) en cada columna (7)
     for ( let j=0; j<7; j++) {
         for ( let i=0; i<3; i++ ) {
@@ -169,7 +173,6 @@ const control = () => {
                 slots[ar[j]][i+2] == slots[ar[j]][i+3] &&
                 slots[ar[j]][i+3] != undefined)
                 {
-                    console.error(slots[ar[j]][i], 'win');
                     lineUp = [`${ar[j]}${i+1}`, `${ar[j]}${i+2}`, `${ar[j]}${i+3}`, `${ar[j]}${i+4}`];
                     drawLine(lineUp, slots[ar[j]][i]);
                 }
@@ -184,7 +187,6 @@ const control = () => {
                 slots[ar[j+2]][i] == slots[ar[j+3]][i] &&
                 slots[ar[j+3]][i] != undefined)
                 {
-                    console.error(slots[ar[j]][i], 'win');
                     lineUp = [`${ar[j]}${i+1}`, `${ar[j+1]}${i+1}`, `${ar[j+2]}${i+1}`, `${ar[j+3]}${i+1}`];
                     drawLine(lineUp, slots[ar[j]][i]);
                 }
@@ -194,12 +196,11 @@ const control = () => {
     // DIAGONAL ASCENDENTE (3) por fila (4) por columna
     for ( let j=0; j<4; j++) {
         for ( let i=0; i<3; i++ ) {
-            if (slots[ar[j]][i]   == slots[ar[j+1]][i+1] && 
+            if (slots[ar[j]][i]     == slots[ar[j+1]][i+1] && 
                 slots[ar[j+1]][i+1] == slots[ar[j+2]][i+2] &&
                 slots[ar[j+2]][i+2] == slots[ar[j+3]][i+3] &&
                 slots[ar[j+3]][i+3] != undefined)
                 {
-                    console.error(slots[ar[j]][i], 'win');
                     lineUp = [`${ar[j]}${i+1}`, `${ar[j+1]}${i+2}`, `${ar[j+2]}${i+3}`, `${ar[j+3]}${i+4}`];
                     drawLine(lineUp, slots[ar[j]][i]);
                 }
@@ -214,7 +215,6 @@ const control = () => {
                 slots[ar[j+2]][i+1] == slots[ar[j+3]][i] &&
                 slots[ar[j+3]][i] != undefined)
                 {
-                    console.error(slots[ar[j]][i+3], 'win');
                     lineUp = [`${ar[j]}${i+4}`, `${ar[j+1]}${i+3}`, `${ar[j+2]}${i+2}`, `${ar[j+3]}${i+1}`];
                     drawLine(lineUp, slots[ar[j]][i+3]);
                 }
@@ -222,14 +222,42 @@ const control = () => {
     }
 
     // EMPATE
-    if ((countCol.A == 6) && (countCol.B == 6) && (countCol.C == 6) && 
-        (countCol.D == 6) && (countCol.E == 6) && (countCol.F == 6) && 
-        (countCol.G == 6) && (lineUp == '')) {
+    if ((countCol.A==6)&&(countCol.B==6)&&(countCol.C==6)&&(countCol.D == 6)&&
+        (countCol.E==6)&&(countCol.F==6)&&(countCol.G==6)&&(lineUp=='')) {
             document.querySelector('.columns').removeEventListener('mousedown', clickHandler);
             document.querySelector('.endGame').classList.remove('hidden');
             document.querySelector('.win').innerHTML = `<p>BOTH LOSES</p>`;
             document.querySelector('.endToken').classList.add('bicolor');
+            console.warn('its a tie');
         }
+}
+
+const animation = (l,c) => {
+    document.querySelector('.shift').classList.remove('posD','pos0');
+    document.querySelector('.shift').classList.add(`pos${l}`,'pos7');
+    document.querySelector('.columns').classList.toggle('hidden');
+
+    setTimeout(()=>{
+        document.querySelector('.shift').classList.remove('pos7');
+        document.querySelector('.shift').classList.add(`pos${c}`);
+    },100);
+
+    setTimeout(()=>{
+        document.querySelector('.shift').classList.remove(`pos${l}`,`pos${c}`);
+        document.querySelector('.shift').setAttribute('class',`shift posD pos0`);
+        document.querySelector('.shift').classList.toggle('hidden');
+
+        spaceColor.classList.add(color)
+        slots[letter].push(color);
+
+    },900);
+
+    setTimeout(()=>{
+        control();
+        changeColor();
+        document.querySelector('.shift').classList.toggle('hidden');
+        document.querySelector('.columns').classList.toggle('hidden');
+    },1000);
 }
 
 const clickHandler = e => {
@@ -237,38 +265,43 @@ const clickHandler = e => {
     auxCount = countCol[letter];
 
     if (auxCount < 6) {
-        color++;
         auxCount++;
         countCol[letter] = auxCount;
-        dir = document.querySelector(`.${letter}${auxCount}`);
+        spaceColor = document.querySelector(`.${letter}${auxCount}`);
 
-        if ( color%2 != 0 ) {
-            dir.classList.add('red')
-            slots[letter].push('red');
-        } else {
-            dir.classList.add('blue')
-            slots[letter].push('blue');
-        }
-
-        // console.log(color,letter,auxCount);
-        // console.warn(slots[letter][auxCount-1]);
-        control();
+        animation(letter,auxCount);
     }
 }
 
 const newGame = () => {
-    countCol = { "A": 0, "B": 0, "C": 0, "D": 0, "E": 0, "F": 0, "G": 0 };
-    slots =    { "A":[], "B":[], "C":[], "D":[], "E":[], "F":[], "G":[] };
-    lineUp = [];
-    c++;
-
     main.innerHTML = newTemplate;
-    let token;
-    ( c%2 != 0 ) ? token = 'red' : token = 'blue'
-    document.querySelector('.shift').classList.add(token);
+    countCol = {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "F": 0,
+        "G": 0
+    };
+    slots = {
+        "A": [],
+        "B": [],
+        "C": [],
+        "D": [],
+        "E": [],
+        "F": [],
+        "G": []
+    };
+    lineUp = [];
+
+    game++;
+    (game%2 != 0) ? redBlue = true : redBlue = false
+    changeColor();
+
     document.querySelector('button').addEventListener('click', newGame);
     document.querySelector('.columns').addEventListener('mousedown', clickHandler)
-    console.log('NEW GAME',c,'STARTS',token.toUpperCase());
+    console.log('game n°',game,'starts',color);
 }
 
 newGame();
